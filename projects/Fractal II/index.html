@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%">
+  <head>
+    <meta charset="utf-8">
+    <title>Shezard - Fractal - II</title>
+  </head>
+  <body style="width:100%;height:100%;overflow:hidden;position:absolute;top:-8px;left:-8px;">
+  
+    <script type="text/javascript" src="three.js"></script>
+    
+    <script id="vertexShader" type="x-shader/x-vertex">
+      #ifdef GL_ES
+        precision highp float;
+      #endif
+      
+      varying float nor;
+      uniform float time;
+      vec2 resolution; 
+ 
+      void main() {
+        //nor = max(2.5,dot(normalize(position+3.0),normalize(normal))*-2.0+3.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position,1.0 );
+      }
+    </script>
+    
+    <script id="fragmentShader" type="x-shader/x-fragment">
+      #ifdef GL_ES
+        precision highp float;
+      #endif
+      
+      varying float nor;
+      uniform float time;
+      vec2 resolution = vec2(1366,667);
+      
+      vec3 mandelDot( in vec2 uv, in float time ) {
+        int j;
+        float cr = -.5;
+        float ci = .5;
+        float pr = uv.x;
+        float pi = uv.y;
+        float zr = 0.0;
+        float zi = 0.0;
+        for (int i=0;i<50;i++) {
+          j = i;
+          zr = pr*pr-pi*pi+cr;
+          zi = 2.0*pr*pi+ci;
+          
+          zr += cos(time);
+          
+          zi *= .9;
+          
+          if(zr*zr+zi*zi>50.0+cos(time) && zr*zi < sin( time*time )) break;
+          pr = zr;
+          pi = zi;
+        }
+        
+        float r = float(j)/10.0;
+        float g = float(j)/20.0;
+        float b = float(j)/30.0;
+        
+        return vec3(r,g,b);
+      }
+      
+      void main() {
+        vec2 uv = gl_FragCoord.xy/resolution.xy;
+        vec3 c = mandelDot( vec2(uv.x,uv.y), time );
+        gl_FragColor = vec4( c,1.0 );
+      }
+    </script>
+    
+    <script>
+    var camera, scene, renderer, geometry, shader, light;
+    
+    var mesh;
+    
+    var t = 0.0;
+    
+    init();
+    animate();
+
+    function init() {
+    
+        // Create the Scene
+        scene = new THREE.Scene();
+        
+        // Create and add the cam to the scene
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.z = 8;
+        scene.add( camera );
+        
+        // Create a red wireframed cube
+        geometry = new THREE.PlaneGeometry( 200, 200, 1, 1 );
+        shader = new THREE.ShaderMaterial({
+          vertexShader   : document.querySelector( '#vertexShader' ).textContent,
+          fragmentShader : document.querySelector( '#fragmentShader' ).textContent,
+          uniforms : {
+            time : {
+              type : 'f',
+              value : t
+            }
+          },
+          fog : true,
+          light : true
+        });
+
+        // And the plane to the scene
+        mesh = new THREE.Mesh( geometry,shader ); // No material here
+        scene.add( mesh );        
+        
+        // Render the scene
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        document.body.appendChild( renderer.domElement );
+    }
+
+    function animate() {
+        // Call render each frame
+        requestAnimationFrame( animate );
+        render();
+
+    }
+
+    function render() {
+        t += .01;
+        shader.uniforms.time.value = t;
+        renderer.render( scene, camera );
+    }
+
+    </script> 
+  <body>
+<html>
