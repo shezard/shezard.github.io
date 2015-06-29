@@ -67,6 +67,17 @@ section {
   padding : 17px 0;
 }
 
+/* see https://github.com/twbs/bootstrap/blob/master/less/mixins/clearfix.less */
+.clearfix:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+
+section:last-child {
+  margin-bottom : 20px;
+}
+
 .big-button {
   color : #fafafa;
   background-color : #aaa;
@@ -104,7 +115,11 @@ p:first-child {
 
 @media (max-width: 640px) {
   body {
-    width: 100%;
+    width: calc(100% - 20px);
     padding: 10px;
+  }
+
+  .big-button {
+    padding: 5px;
   }
 }
