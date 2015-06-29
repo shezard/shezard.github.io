@@ -7,9 +7,9 @@ gulp.task('default', function() {
         .pipe(minifyHTML({
           empty: true
         }))
-        .pipe(inlineCss({
-          removeLinkTags: false,
-          preserveMediaQueries: true
-        }))
+        /*.pipe(inlineCss({
+          preserveMediaQueries: true,
+          removeLinkTags: true,
+        }))*/
         .pipe(gulp.dest('./'));
 });
