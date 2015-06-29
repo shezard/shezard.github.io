@@ -7,6 +7,6 @@ gulp.task('default', function() {
         .pipe(minifyHTML({
           empty: true
         }))
-        .pipe(inlineStyle())
+        .pipe(inlineStyle('./'))
         .pipe(gulp.dest('./'));
 });
