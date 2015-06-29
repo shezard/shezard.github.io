@@ -63,7 +63,7 @@ a > i {
 
 section {
   position : relative;
-  border-top : #aaa 9px solid;
+  border-top : #aaa 1px solid;
   padding : 17px 0;
 }
 
@@ -75,22 +75,20 @@ section {
   border-radius : 8px;
   cursor : pointer;
   text-decoration : none;
-  font-weight : bold;
   transition: border-radius .25s linear;
+  border-radius : 0;
 }
 
 .big-button-right {
-  border-radius : 8px 0 0 8px;
   float : right;
 }
 
 .big-button-left {
-  border-radius : 0 8px 8px 0;
   float : left;
 }
 
 .big-button:hover {
-  border-radius : 0px
+  border-radius : 8px
 }
 
 p {
