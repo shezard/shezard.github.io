@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html><head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">    
+		<title>Shezard -- Pad</title>
+    <style>
+      *  {
+        padding: 0;
+        margin: 0;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        width: 100%;
+        background: #111;
+        height: 100%;
+        overflow: hidden;
+      }
+      .loader {
+        position: absolute;
+        background: #111;
+        opacity: 1;
+        width: 100%;
+        height: 100%;
+        z-index: 200;
+        -webkit-transform:translateZ(0);
+      }
+      .pad-row {
+        width: 100;
+        margin-top: 1%;
+      }
+      .pad {
+        transition : background .125s linear;
+        background: #a00;
+        position : relative;
+        display: inline-block;
+        width: 22.5%;
+        height: 88px;
+        margin: 1% 1% 0% 1%;
+        border-radius: 14px;
+        border : 0px solid rgba(255,255,255,.1);
+        /*box-shadow: 0px 0px 7px 1px rgba(255,0,0,.3);*/
+      }
+      .pad.orange {
+        background: #d13406;
+        /*box-shadow: 0px 0px 7px 1px rgba(255,65,7,.3);*/
+      }
+      .pad.green {
+        background: #0a0;
+        /*box-shadow: 0px 0px 7px 1px rgba(0,255,0,.3);*/
+      }
+      .pad.yellow {
+        background: #bd940a;
+        /*box-shadow: 0px 0px 7px 1px rgba(255,200,13,.3);*/
+      }
+      .pad.on {
+        background: #f00;
+        /*box-shadow: 0px 0px 7px 1px rgba(255,0,0,.7);*/
+      }
+      .pad.on.orange {
+        background: #ff3f07;
+        /*box-shadow: 0px 0px 7px 1px rgba(255,65,7,.7);*/
+      }
+      .pad.on.yellow {
+        background: #ffc80d;
+        /*box-shadow: 0px 0px 7px 1px rgba(255,200,13,.7);*/
+      }
+      .pad.on.green {
+        background: #0f0;
+        /*box-shadow: 0px 0px 7px 1px rgba(0,255,0,.7);*/
+      }
+      .pad.big {
+        width: 47%;
+      }
+      .pad:nth-child(1) {
+        margin-left: 2%;
+      }
+      .pad:nth-child(4) {
+        margin-right: 2%;
+      }
+      .pad-inner {
+        margin: 4%;
+        width: 92%;
+        height: 92%;
+        background: rgba(255,255,255,.3);
+        /*-webkit-filter: blur(6px);*/
+        border-radius: 14px;
+      }
+      [data-role=play]::after,[data-role=rec]::after,[data-role=pause]::after {
+        position: absolute;
+        top: 40%;
+        color: rgba(0,0,0,.8);
+        font-size: 200%;       
+      }
+      [data-role=play]::after {
+        content:"\25BA";
+        top: 33%;
+        left: 34%;
+        font-size: 300%;
+      }
+      [data-role=rec]::after {
+        left: 34%;
+        top: 19%;
+        content:"\25CF";
+        font-size: 500%;
+      }
+      [data-role=pause]::after {
+        left: 31%;
+        content:"\2590\2590";
+      }
+    </style>
+	</head>
+	<body>
+    <div class="loader"></div>
+    <div class="pad-row">
+      <div class="pad" data-id="0" data-freq="261.63"></div><div class="pad" data-id="1" data-freq="293.66"></div><div class="pad" data-id="2" data-freq="329.63"></div><div class="pad" data-id="3" data-freq="349.23"></div>
+    </div>
+    <div class="pad-row">
+      <div class="pad orange" data-id="4" data-freq="392"></div><div class="pad orange" data-id="5" data-freq="440"></div><div class="pad orange" data-id="6" data-freq="493.88"></div><div class="pad orange" data-id="7" data-freq="523.25"></div>
+    </div>
+    <div class="pad-row">
+      <div class="pad yellow" data-id="8" data-freq="587.33"></div><div class="pad yellow" data-id="9" data-freq="659.25"></div><div class="pad yellow" data-id="10" data-freq="698.46"></div><div class="pad yellow" data-id="11" data-freq="783.99"></div>
+    </div>
+    <div class="pad-row">
+      <div class="pad big" data-role="rec"></div><div class="pad big green" data-role="play"></div>
+    </div>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script> 
+		<script>
+      $(document).ready(function() {      
+        if('webkitAudioContext' in window) {
+        
+          // garde une trace des états possibles de l'application
+          window.states = {
+            recording: false,
+            playing: false,
+            record : {
+              start : false
+            },
+            records: [],
+            func: [],
+            timeout: []
+          };
+        
+          // on récupére le context audio
+          var ctx = new webkitAudioContext();
+          // contiendra les données des touches
+          var pads = [];
+          // remet a zero l'osc
+          var reset = function(pad) {
+            pad.osc = ctx.createOscillator();
+            pad.osc.frequency.value = pad.freq;
+            
+            pad.filter = ctx.createBiquadFilter();
+            pad.filter.type = 0;
+            pad.filter.frequency.value = 1000;
+            
+            pad.osc.connect(pad.filter);
+            pad.filter.connect(ctx.destination);
+          };
+          var play = function(id) {
+            $('[data-id='+id+']').addClass('on'); 
+            pads[id].pressed = true;
+            pads[id].osc.start(ctx.currentTime);
+          };
+          var stop = function(id) {
+            $('[data-id='+id+']').removeClass('on');
+            pads[id].pressed = false;
+            pads[id].osc.stop(ctx.currentTime);
+            reset(pads[id]);
+          };
+          var togglePlayPause = function($el) {
+            if($el.attr('data-role') == 'play' && !states.recording && states.records.length) {
+              $el.attr('data-role','pause');
+              $el.addClass('on');
+              
+              states.playing = true;
+              playback();
+            } else {
+              $el.attr('data-role','play');
+              $el.removeClass('on');
+              
+              states.playing = false;
+              for(var i = 0 ; i < states.timeout.length ; i++) {
+                clearTimeout(states.timeout[i]);
+              }
+            }
+          }
+          var toggleRecPause = function($el) {
+            if($el.attr('data-role') == 'rec' && !states.playing) {
+              $el.attr('data-role','pause');
+              $el.addClass('on');
+              
+              states.recording = true;
+              states.record.start = new Date().getTime();
+              states.records = [];
+              states.func = [];
+              states.timeout = [];
+            } else {
+              $el.attr('data-role','rec');
+              $el.removeClass('on');
+              
+              states.recording = false;
+            }
+          }
+          // fonction appelée lorsqu'on appuie sur le bouton play
+          var playback = function() {
+            // on prend chaque record en commençant par la fin
+            for(var i = states.records.length-1 ; i >= 0  ; i--) {
+              // si on arrive au records[0] on crée un faux record précedent contenant time:0
+              var prevEvent = i > 0 ? states.records[i-1] : {time:0};
+              var event = states.records[i];
+              // on calcule le temps entre l'évenement courant et le précédent
+              var delay = event.time - prevEvent.time;
+              // on remplis le tableau de fonction grace a generateCallback
+              states.func[i] = generateCallback(function(i,d,e){  
+                if(e.type == 'start') {
+                  play(e.id);
+                } else if(e.type == 'stop') {
+                  stop(e.id);
+                }
+                if(states.func[i]) {
+                  states.func[i]();
+                } else {
+                  states.func[0]();
+                }
+              },delay,i+1,event);
+            }
+            states.func[0]();
+          };
+          // genere une fonction qui delay l'execution de *after* de *delay* millisecondes, et passe comme arguments a *after* : *index*,*delay* et *event*
+          var generateCallback = function(after,delay,index,event) {
+            return function() {
+              states.timeout.push(setTimeout(function() {
+                after(index,delay,event);
+              },delay));
+            };
+          };
+          
+          // on initialise les pads ici
+          $('.pad').each(function() {
+            var $cur = $(this);
+            $cur.height($cur.width());
+            $cur.append('<div class="pad-inner"></div>');
+            var pad = {
+              $el : $cur,
+              freq : $cur.attr('data-freq'),
+              osc : null,
+              filter : null,
+              pressed : false
+            };
+            pads.push(pad);
+            reset(pad);
+          });
+          // on cache le loader
+          setTimeout(function() {
+            $('.loader').animate({opacity:0},200,function() {
+              $('.loader').hide();
+            });
+          },200);
+          
+          // gestion des events
+          $('*').on('drag',function(e) {
+            e.preventDefault();
+          });
+          
+          $('*:not(.pad)').on('touchstart',function(e) {
+            e.preventDefault();
+          });
+          
+          $('.pad:not(.big)').on('touchstart',function(e) {
+            var id = +$(this).attr('data-id');
+            if(!pads[id].pressed) {
+              play(id);
+              if(states.recording) {
+                states.records.push({id:id,time:new Date().getTime() - states.record.start,type:'start'});
+              }
+            }
+            e.preventDefault();
+          });
+          
+          $('.pad:not(.big)').on('touchend',function(e) {
+            var id = +$(this).attr('data-id');
+            if(pads[id].pressed) {
+              stop(id);
+              if(states.recording) {
+                states.records.push({id:id,time:new Date().getTime() - states.record.start,type:'stop'});
+              }
+            }
+            e.preventDefault();
+          });
+          
+          $('.pad.big').on('touchstart',function(e) {
+            var index = $(this).index();
+            if(index == 0) {
+              toggleRecPause($(this));
+            } else if(index == 1) {
+              togglePlayPause($(this));
+            }
+            e.preventDefault();
+          });
+        }
+      });
+		</script>
+</body></html>
+                

@@ -1,0 +1,30 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Wind Swapper</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+  <style type="text/css">
+      body {
+          margin: 0;
+          overflow: hidden;
+      }
+  </style>
+</head>
+<body>
+
+<script type="text/javascript" src="js/preload.js"></script>
+<script type="text/javascript" src="js/create.js"></script>
+<script type="text/javascript" src="js/update.js"></script>
+
+<script type="text/javascript">
+  window.g = window.g || {};
+  var game = new Phaser.Game(2400, 600, Phaser.AUTO, '', { 
+    preload: g.preload, 
+    create: g.create, 
+    update: g.update
+  });
+</script>
+
+</body>
+</html>

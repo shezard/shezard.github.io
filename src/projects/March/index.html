@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%;background-color:#333;">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Shezard - March</title>
+  </head>
+  <body style="width:100%;height:100%;overflow:hidden;position:absolute;top:-8px;left:-8px;">
+  
+    <script type="text/javascript" src="three.js"></script>
+    
+    <script id="vertexShader" type="x-shader/x-vertex">
+      #ifdef GL_ES
+        precision highp float;
+      #endif
+      
+      uniform float time;
+      vec2 resolution; 
+ 
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position,1.0 );
+      }
+    </script>
+    
+    <script id="fragmentShader" type="x-shader/x-fragment">
+
+      #ifdef GL_ES
+        precision highp float;
+      #endif
+      
+      uniform float time;
+
+      /* space domain */
+      const vec2 RESOLUTION = vec2(1333,700);
+      /* margin of error */
+      const float E = 0.001;
+      /* number of itereration */
+      const int MAX_STEP = 80;
+
+      /* pseudo-noise */
+      float rand(vec2 c){
+          return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+      }
+
+      /* smooth min (see : http://www.iquilezles.org/www/articles/smin/smin.htm) */
+      float smin(float a, float b, float k) {
+          float res = exp(-k*a) + exp(-k*b);
+          return -log(res)/k;
+      }
+
+      /* repeat it */
+      vec3 repeat(vec3 p ) {
+        vec3 c = vec3(10.0,10.0,clamp(time,0.0,10.0));
+        return mod(p,c)-0.5*c;
+      }
+
+      /* move it */
+      vec3 translate(vec3 p, vec3 t) {
+        return p+t;
+      }
+
+      /* rotate it */
+      vec3 rotate(vec3 p, mat3 m) {
+        return p*m;
+      }
+
+      /* blast it */
+      float blast(vec3 p , float ratio) {
+        return sin(ratio*p.x)*sin(ratio*p.y)*sin(ratio*p.z);
+        return -abs((p.x*p.x+p.y*p.y)*.005*cos(time*10.0));
+      }
+
+      /* blured sphere */
+      float sphere(vec3 p, float ratio) {
+        return length(p*ratio)-(1.0)*ratio;
+      }
+
+      /* cylinder */
+      float cylinder(vec3 p, vec3 c) {
+        return length(p.xz-c.xy)-c.z;
+      }
+
+      float iso(vec3 p) {
+
+        //p = translate(p,vec3(0.0,cos(time*10.0)*10.0,0.0));
+
+        float sphereR = sphere(repeat(p*clamp(time,0.0,1.0)),1.0);//sphere(repeat(p),1.0);
+        float sphereD = blast(p,cos(time*2.0)*.5);
+
+        return sphereR+sphereD;
+      }
+
+      void main() {
+        vec2 uv = gl_FragCoord.xy/RESOLUTION.xy;
+
+        /* ray origin */
+        vec3 ro = vec3(0.0,0.0,time*100.0);
+        /* ray direction */
+        vec3 rd = normalize(vec3(-1.0+2.0*uv.x,-0.5+1.0*uv.y,1.0));
+
+        /* distance to the target */
+        float dist = 0.0;
+        /* next position */
+        vec3 p = ro;
+        /* the aim is to feed this with something else than black */
+        vec3 col = vec3(0.0);
+
+        /* marching*/
+        for(int i = 0 ; i < MAX_STEP ; i++){
+          /* calculate distance */
+          dist = iso(p);
+          /* move one step at a time */
+          p = p+rd*dist;
+          /* if dist is close enougth we call it a day */
+          if(dist < E) {
+            /* free ambient oclusion based on the number of iteration */
+            vec3 ao = vec3(1.0-float(i)/float(MAX_STEP));
+            col = ao;
+            break;
+          }
+        }
+
+        gl_FragColor = vec4( col.x-.2,col.y-.1,col.z-.05,1.0 );
+      }
+    </script>
+    
+    <script>
+    var camera, scene, renderer, geometry, shader, light;
+    
+    var mesh;
+    
+    var t = 0.0;
+    
+    setTimeout(function() {
+      init();
+      animate();
+    });
+
+    function init() {
+    
+        // Create the Scene
+        scene = new THREE.Scene();
+        
+        // Create and add the cam to the scene
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.z = 2;
+        scene.add( camera );
+        
+        // Create a simple plane to get put the shader on
+        geometry = new THREE.PlaneGeometry( 200, 200, 1, 1 );
+        shader = new THREE.ShaderMaterial({
+          vertexShader   : document.querySelector( '#vertexShader' ).textContent,
+          fragmentShader : document.querySelector( '#fragmentShader' ).textContent,
+          uniforms : {
+            time : {
+              type : 'f',
+              value : t
+            }
+          },
+          fog : true,
+          light : true
+        });
+
+        // And the plane to the scene
+        mesh = new THREE.Mesh( geometry,shader ); // No material here
+        scene.add( mesh );
+        
+        // Render the scene
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        document.body.appendChild( renderer.domElement );
+    }
+
+    function animate() {
+        // Call render each frame
+        requestAnimationFrame( animate );
+        render();
+
+    }
+
+    function render() {
+        t += .001;
+        shader.uniforms.time.value = t;
+        renderer.render( scene, camera );
+    }
+
+    </script> 
+  <body>
+<html>
