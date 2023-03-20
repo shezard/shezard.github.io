@@ -1,2 +1,5 @@
+# Installation
+`npm install`
+
 # Build
-run "gulp"
+`npm run build`

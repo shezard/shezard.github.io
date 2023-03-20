@@ -19,10 +19,6 @@ header {
   cursor : default;
 }
 
-a > i {
-  color : #fafafa;
-}
-
 .shezard {
   transition: all .3s linear;
 }
@@ -79,15 +75,14 @@ section:last-child {
 }
 
 .big-button {
-  color : #fafafa;
-  background-color : #aaa;
+  color : #333;
+  border : 1px solid #aaa;
   display : inline-block;
   padding : 5px 8px;
   border-radius : 8px;
   cursor : pointer;
   text-decoration : none;
-  transition: border-radius .25s linear;
-  border-radius : 0;
+  border-radius : 3px;
 }
 
 .big-button-right {
@@ -96,10 +91,6 @@ section:last-child {
 
 .big-button-left {
   float : left;
-}
-
-.big-button:hover {
-  border-radius : 8px
 }
 
 p {

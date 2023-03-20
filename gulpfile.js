@@ -3,8 +3,6 @@ var minifyHTML = require('gulp-minify-html');
 var inlineStyle = require('gulp-inline-style');
 var minifyInline = require('gulp-minify-inline');
 
-gulp.task('default', ['home', 'projects'])
-
 gulp.task('home', function() {
     return gulp.src('./src/index.html')
         .pipe(minifyHTML({
@@ -24,3 +22,5 @@ gulp.task('projects', function() {
         .pipe(minifyInline())
         .pipe(gulp.dest('./projects/'));
 });
+
+gulp.task('default', gulp.series(['home', 'projects']));

@@ -4,6 +4,7 @@
   "description": "My personnal website",
   "main": "index.html",
   "scripts": {
+    "build": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Damien Fayol",
