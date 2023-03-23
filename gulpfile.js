@@ -1,7 +1,7 @@
-var gulp = require('gulp');
-var minifyHTML = require('gulp-minify-html');
-var inlineStyle = require('gulp-inline-style');
-var minifyInline = require('gulp-minify-inline');
+const gulp = require('gulp');
+const minifyHTML = require('gulp-minify-html');
+const inlineStyle = require('gulp-inline-style');
+const minifyInline = require('gulp-minify-inline');
 
 gulp.task('home', function() {
     return gulp.src('./src/index.html')
@@ -10,7 +10,7 @@ gulp.task('home', function() {
         }))
         .pipe(inlineStyle('./'))
         .pipe(minifyInline())
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest('./docs'));
 });
 
 gulp.task('projects', function() {
@@ -20,7 +20,17 @@ gulp.task('projects', function() {
         }))
         .pipe(inlineStyle('./src/css'))
         .pipe(minifyInline())
-        .pipe(gulp.dest('./projects/'));
+        .pipe(gulp.dest('./docs/projects/'));
 });
 
-gulp.task('default', gulp.series(['home', 'projects']));
+gulp.task('copy-cv', function() {
+  return gulp.src('./src/cv/*.pdf')
+    .pipe(gulp.dest('./docs/cv'));
+});
+
+gulp.task('copy-projects', function() {
+  return gulp.src('./src/projects/*/*')
+    .pipe(gulp.dest('./docs/projects'));
+});
+
+gulp.task('default', gulp.series(['home', 'projects', 'copy-cv', 'copy-projects']));
