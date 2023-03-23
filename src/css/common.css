@@ -40,11 +40,11 @@ header {
 }
 
 .beaker:hover + .shezard {
-  color : #f00;
+  color : #d00;
 }
 
 .beaker > i {
-  color : #f00;
+  color : #d00;
 }
 
 .nav, .nav > i {
@@ -54,7 +54,7 @@ header {
 }
 
 .nav:hover, .nav:hover > i, .nav.selected, .nav.selected > i {
-  color : #f00;
+  color : #d00;
 }
 
 section {
@@ -79,7 +79,6 @@ section:last-child {
   border : 1px solid #aaa;
   display : inline-block;
   padding : 5px 8px;
-  border-radius : 8px;
   cursor : pointer;
   text-decoration : none;
   border-radius : 3px;
