@@ -16,6 +16,7 @@ header {
   position : relative;
   line-height : 70px;
   height : 70px;
+  margin-top: 70px;
   cursor : default;
 }
 
@@ -47,6 +48,15 @@ header {
   color : #d00;
 }
 
+h1, nav {
+  display: inline-block;
+  width: 50%;
+}
+
+nav {
+  text-align: end;
+}
+
 .nav, .nav > i {
   color : #333;
   text-decoration : none;
@@ -59,7 +69,6 @@ header {
 
 section {
   position : relative;
-  border-top : #aaa 1px solid;
   padding : 17px 0;
 }
 
