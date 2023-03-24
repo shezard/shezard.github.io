@@ -1,4 +1,4 @@
-﻿
+
 window.onload = function() {
   
   // RESIZE
@@ -41,7 +41,7 @@ window.onload = function() {
       Math._tick++;
       clear && paper.clear();
       cb && cb(Math._tick);
-      Math._id = requestAnimationFrame(Math._cb);
+      Math._id = requestAnimationFrame(Math._cb); 
     }
     Math._cb();
   };

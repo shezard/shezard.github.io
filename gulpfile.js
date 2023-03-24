@@ -29,8 +29,8 @@ gulp.task('copy-cv', function() {
 });
 
 gulp.task('copy-projects', function() {
-  return gulp.src('./src/projects/*/*')
+  return gulp.src('./src/projects/**/*')
     .pipe(gulp.dest('./docs/projects'));
 });
 
-gulp.task('default', gulp.series(['home', 'projects', 'copy-cv', 'copy-projects']));
+gulp.task('default', gulp.series(['home', 'copy-projects', 'projects', 'copy-cv']));
