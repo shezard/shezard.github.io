@@ -10,9 +10,9 @@
   "author": "Damien Fayol",
   "license": "ISC",
   "devDependencies": {
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "gulp-inline-style": "^0.1.1",
-    "gulp-minify-html": "^1.0.3",
+    "gulp-minify-html": "^1.0.6",
     "gulp-minify-inline": "^1.1.0"
   }
 }
